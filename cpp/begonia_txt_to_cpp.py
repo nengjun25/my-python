@@ -27,6 +27,7 @@ txts = os.listdir(txt_dir)
 for txt in txts:
     # and txt.startswith("Begonia_ATE_Aux_ADC_1v2")
     if txt.endswith(".txt"):
+        print(txt)
         source = open(txt_dir+txt, mode="r")
         res = open("./result/"+txt[:-4]+".cpp", mode="w")
         c_writer = CppWriter(res)
@@ -34,14 +35,25 @@ for txt in txts:
 
         s = source.read()
         s_list = s.splitlines(False)
+        heads = []
         start = False
         for line in s_list:
             line = line.replace("\t", " ")
             if line.startswith('//') is False and line != "":
                 print(line)
                 if start is False:
-                    c_writer.define_function(CppWriter.void, txt[:-4], None)
-                    start = True
+                    lh = len(heads)
+                    first = ""
+                    if lh != 0:
+                        first = heads.pop()
+                        for head in heads:
+                            c_writer.write(head)
+                            c_writer.write_enter()
+                    if line.startswith("M") is True or line.startswith("R") is True or line.startswith("W") is True or line.startswith("wait") is True:
+                        c_writer.define_function(CppWriter.void, txt[:-4], None)
+                        c_writer.write(first)
+                        c_writer.write_enter()
+                        start = True
                 line_list = line.split(" ")
                 ll = len(line_list)
                 if ll > 1:
@@ -79,7 +91,7 @@ for txt in txts:
                         if "ms" in line_list[1]:
                             f = float(line_list[1][:line_list[1].index("ms")])
                             if f >= 1:
-                                c_writer.call_function("sleep", [str(int(f))])
+                                c_writer.call_function("Sleep", [str(int(f))])
                             else:
                                 c_writer.call_function("MySleep", [str(int(f*1000))])
                         c_writer.write(c_writer.space*2+"//"+line)
@@ -89,8 +101,11 @@ for txt in txts:
                         c_writer.write("//"+line)
 
             else:
-                c_writer.write(line)
-                c_writer.write_enter()
+                if start is False:
+                    heads.append(line)
+                else:
+                    c_writer.write(line)
+                    c_writer.write_enter()
         c_writer.end_function()
         res.close()
 
