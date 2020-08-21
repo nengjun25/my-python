@@ -12,7 +12,6 @@ sheet_name = sys.argv[2]
 column_index = sys.argv[3]
 target_name = sys.argv[4]
 
-
 wb = Workbook()
 ws = wb.active
 
@@ -20,7 +19,6 @@ xl_read = load_workbook(xls_name)
 
 res = open(target_name, mode='w')
 res.write("instance {"+"\n")
-
 
 sheet = xl_read.get_sheet_by_name(sheet_name)
 max_row = sheet.max_row

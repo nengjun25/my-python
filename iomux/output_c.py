@@ -1,6 +1,9 @@
 
 # Filename: output_c.py
 
+from output_v import IndentManager
+from output_v import VerilogWriter
+
 copy_right = '''
 /*******************************************************************************
 *  Copyright (C) Catena 2020
@@ -133,3 +136,31 @@ def write_func_annotation(des,func_param,func_ret):
     s = '''/*******'''+enter+"*"
     s += des
     #todo
+
+
+class CppWriter(VerilogWriter):
+
+    void = "void"
+    c_return = "return"
+
+    def __init__(self, file):
+        self.indent_manager = IndentManager()
+        self.file = file
+        self.res = ""
+
+    def define_function(self, ret_type, func_name, args):
+        s = ret_type+self.space+func_name+self.p_thesis+self.back_p_thesis+self.space+self.braces
+        self.indent_manager.add_indent(4)
+        self.write_expression(s)
+
+    def end_function(self):
+        self.indent_manager.pop_indent()
+        self.write_enter()
+        self.write(self.back_braces)
+
+    def call_function(self, func_name, args):
+        s = func_name+self.p_thesis+",".join(args)+self.back_p_thesis+self.semicolon
+        self.write(s)
+
+    def return_value(self,value):
+        self.write(self.c_return+self.space+value+self.semicolon)
